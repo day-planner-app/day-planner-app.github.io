@@ -1,15 +1,11 @@
 import { useMemo, useState } from 'react'
-import { MonthView } from './components/MonthView'
-import { PlannerHeader } from './components/PlannerHeader'
-import { TimelineGrid } from './components/TimelineGrid'
-import { blocksForDate } from './data/samplePlan'
-import {
-  daysForView,
-  formatViewTitle,
-  navUnitLabel,
-  shiftSelectedDate,
-} from './lib/week'
-import type { PlannerView } from './types'
+import { LandingPage } from './pages/LandingPage'
+import { PlannerPage } from './pages/PlannerPage'
+import { planDay } from './lib/mockPlannerAgent'
+import { toDateKey } from './lib/week'
+import type { DayPlan } from './types'
+
+type Screen = 'landing' | 'planner'
 
 const App = () => {
   const today = useMemo(() => {
@@ -18,66 +14,32 @@ const App = () => {
     return now
   }, [])
 
-  const [selectedDate, setSelectedDate] = useState(today)
-  const [view, setView] = useState<PlannerView>('week')
+  const [screen, setScreen] = useState<Screen>('landing')
+  const [planning, setPlanning] = useState(false)
+  const [planByDate, setPlanByDate] = useState<DayPlan>({})
 
-  const visibleDays = useMemo(() => daysForView(view, selectedDate), [view, selectedDate])
-  const blocksByDay = useMemo(
-    () => visibleDays.map((day) => blocksForDate(day)),
-    [visibleDays],
-  )
-  const title = useMemo(
-    () => formatViewTitle(view, selectedDate, visibleDays),
-    [view, selectedDate, visibleDays],
-  )
-
-  const shift = (direction: 1 | -1) => {
-    setSelectedDate(shiftSelectedDate(view, selectedDate, direction))
+  const handleSubmit = async (intent: string) => {
+    setPlanning(true)
+    try {
+      const blocks = await planDay(intent, today)
+      const key = toDateKey(today)
+      setPlanByDate((current) => ({ ...current, [key]: blocks }))
+      setScreen('planner')
+    } finally {
+      setPlanning(false)
+    }
   }
 
-  const jumpToToday = () => {
-    setSelectedDate(today)
-  }
-
-  const openDayView = (date: Date) => {
-    setSelectedDate(date)
-    setView('day')
+  if (screen === 'landing') {
+    return <LandingPage planning={planning} onSubmit={handleSubmit} />
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-base-200">
-      <PlannerHeader
-        title={title}
-        view={view}
-        navUnit={navUnitLabel(view)}
-        onViewChange={setView}
-        onPrev={() => shift(-1)}
-        onNext={() => shift(1)}
-        onToday={jumpToToday}
-      />
-
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        {view === 'month' ? (
-          <MonthView
-            days={visibleDays}
-            focusMonth={selectedDate}
-            today={today}
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-            onOpenDay={openDayView}
-            blocksByDay={blocksByDay}
-          />
-        ) : (
-          <TimelineGrid
-            days={visibleDays}
-            today={today}
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-            blocksByDay={blocksByDay}
-          />
-        )}
-      </div>
-    </div>
+    <PlannerPage
+      planByDate={planByDate}
+      initialView="day"
+      onBackToLanding={() => setScreen('landing')}
+    />
   )
 }
 
