@@ -1,17 +1,15 @@
 import { useMemo, useState } from 'react'
-import { InboxPanel } from './components/InboxPanel'
 import { MonthView } from './components/MonthView'
 import { PlannerHeader } from './components/PlannerHeader'
 import { TimelineGrid } from './components/TimelineGrid'
 import { blocksForDate } from './data/samplePlan'
-import { PlusIcon } from './components/Icons'
 import {
   daysForView,
   formatViewTitle,
   navUnitLabel,
   shiftSelectedDate,
 } from './lib/week'
-import type { InboxTask, PlannerView } from './types'
+import type { PlannerView } from './types'
 
 const App = () => {
   const today = useMemo(() => {
@@ -22,8 +20,6 @@ const App = () => {
 
   const [selectedDate, setSelectedDate] = useState(today)
   const [view, setView] = useState<PlannerView>('week')
-  const [inboxOpen, setInboxOpen] = useState(true)
-  const [inboxTasks, setInboxTasks] = useState<InboxTask[]>([])
 
   const visibleDays = useMemo(() => daysForView(view, selectedDate), [view, selectedDate])
   const blocksByDay = useMemo(
@@ -48,18 +44,9 @@ const App = () => {
     setView('day')
   }
 
-  const focusInbox = () => {
-    setInboxOpen(true)
-    window.setTimeout(() => {
-      document.getElementById('inbox-input')?.focus()
-    }, 0)
-  }
-
   return (
     <div className="flex min-h-svh flex-col bg-base-200">
       <PlannerHeader
-        inboxOpen={inboxOpen}
-        onToggleInbox={() => setInboxOpen((open) => !open)}
         title={title}
         view={view}
         navUnit={navUnitLabel(view)}
@@ -69,57 +56,26 @@ const App = () => {
         onToday={jumpToToday}
       />
 
-      <div className={`drawer min-h-0 flex-1 ${inboxOpen ? 'lg:drawer-open' : ''}`}>
-        <input
-          id="inbox-drawer"
-          type="checkbox"
-          className="drawer-toggle"
-          checked={inboxOpen}
-          onChange={() => setInboxOpen((open) => !open)}
-        />
-
-        <div className="drawer-content flex min-h-0 min-w-0 flex-col">
-          {view === 'month' ? (
-            <MonthView
-              days={visibleDays}
-              focusMonth={selectedDate}
-              today={today}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              onOpenDay={openDayView}
-              blocksByDay={blocksByDay}
-            />
-          ) : (
-            <TimelineGrid
-              days={visibleDays}
-              today={today}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              blocksByDay={blocksByDay}
-            />
-          )}
-
-          <div className="fab">
-            <button
-              type="button"
-              className="btn btn-lg btn-circle btn-primary"
-              aria-label="Add to inbox"
-              onClick={focusInbox}
-            >
-              <PlusIcon />
-            </button>
-          </div>
-        </div>
-
-        <div className="drawer-side z-30 h-full">
-          <label htmlFor="inbox-drawer" aria-label="Close inbox" className="drawer-overlay lg:hidden" />
-          <InboxPanel
-            tasks={inboxTasks}
-            onAddTask={(taskTitle) =>
-              setInboxTasks((current) => [{ id: crypto.randomUUID(), title: taskTitle }, ...current])
-            }
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {view === 'month' ? (
+          <MonthView
+            days={visibleDays}
+            focusMonth={selectedDate}
+            today={today}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            onOpenDay={openDayView}
+            blocksByDay={blocksByDay}
           />
-        </div>
+        ) : (
+          <TimelineGrid
+            days={visibleDays}
+            today={today}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            blocksByDay={blocksByDay}
+          />
+        )}
       </div>
     </div>
   )

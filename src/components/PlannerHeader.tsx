@@ -1,9 +1,7 @@
 import type { PlannerView } from '../types'
-import { ArrowLeftIcon, ArrowRightIcon, ChevronIcon, InboxIcon } from './Icons'
+import { ArrowLeftIcon, ArrowRightIcon, ChevronIcon } from './Icons'
 
 type PlannerHeaderProps = {
-  inboxOpen: boolean
-  onToggleInbox: () => void
   title: string
   view: PlannerView
   navUnit: string
@@ -21,8 +19,6 @@ const views: Array<{ id: PlannerView; label: string }> = [
 ]
 
 export const PlannerHeader = ({
-  inboxOpen,
-  onToggleInbox,
   title,
   view,
   navUnit,
@@ -33,19 +29,6 @@ export const PlannerHeader = ({
 }: PlannerHeaderProps) => {
   return (
     <header className="navbar min-h-16 gap-3 bg-transparent px-3 py-2 lg:px-5">
-      <div className="navbar-start w-auto shrink-0">
-        <button
-          type="button"
-          className={`btn rounded-full border-none shadow-none ${
-            inboxOpen ? 'btn-primary' : 'btn-ghost bg-base-100'
-          }`}
-          onClick={onToggleInbox}
-        >
-          <InboxIcon />
-          Inbox
-        </button>
-      </div>
-
       <div className="navbar-center flex flex-1 items-center justify-center gap-3">
         <div className="dropdown">
           <button type="button" tabIndex={0} className="btn btn-ghost gap-1 text-lg font-extrabold">
