@@ -1,28 +1,21 @@
 import type { PlannerView } from '../types'
-import { formatMonthYear } from '../lib/week'
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  CheckSquareIcon,
-  ChevronIcon,
-  GearIcon,
-  InboxIcon,
-} from './Icons'
+import { ArrowLeftIcon, ArrowRightIcon, ChevronIcon, InboxIcon } from './Icons'
 
 type PlannerHeaderProps = {
   inboxOpen: boolean
   onToggleInbox: () => void
-  monthLabelDate: Date
+  title: string
   view: PlannerView
+  navUnit: string
   onViewChange: (view: PlannerView) => void
-  onPrevWeek: () => void
-  onNextWeek: () => void
+  onPrev: () => void
+  onNext: () => void
   onToday: () => void
 }
 
 const views: Array<{ id: PlannerView; label: string }> = [
   { id: 'day', label: 'Day' },
-  { id: 'multi-day', label: 'Multi-Day' },
+  { id: 'multi-day', label: '3 Day' },
   { id: 'week', label: 'Week' },
   { id: 'month', label: 'Month' },
 ]
@@ -30,11 +23,12 @@ const views: Array<{ id: PlannerView; label: string }> = [
 export const PlannerHeader = ({
   inboxOpen,
   onToggleInbox,
-  monthLabelDate,
+  title,
   view,
+  navUnit,
   onViewChange,
-  onPrevWeek,
-  onNextWeek,
+  onPrev,
+  onNext,
   onToday,
 }: PlannerHeaderProps) => {
   return (
@@ -55,7 +49,7 @@ export const PlannerHeader = ({
       <div className="navbar-center flex flex-1 items-center justify-center gap-3">
         <div className="dropdown">
           <button type="button" tabIndex={0} className="btn btn-ghost gap-1 text-lg font-extrabold">
-            {formatMonthYear(monthLabelDate)}
+            {title}
             <ChevronIcon />
           </button>
           <ul
@@ -64,7 +58,7 @@ export const PlannerHeader = ({
           >
             <li>
               <button type="button" onClick={onToday}>
-                Jump to this week
+                Jump to today
               </button>
             </li>
           </ul>
@@ -73,16 +67,16 @@ export const PlannerHeader = ({
           <button
             type="button"
             className="btn btn-ghost join-item btn-square"
-            aria-label="Previous week"
-            onClick={onPrevWeek}
+            aria-label={`Previous ${navUnit}`}
+            onClick={onPrev}
           >
             <ArrowLeftIcon />
           </button>
           <button
             type="button"
             className="btn btn-ghost join-item btn-square"
-            aria-label="Next week"
-            onClick={onNextWeek}
+            aria-label={`Next ${navUnit}`}
+            onClick={onNext}
           >
             <ArrowRightIcon />
           </button>
@@ -116,12 +110,6 @@ export const PlannerHeader = ({
             </button>
           ))}
         </div>
-        <button type="button" className="btn btn-ghost btn-square" aria-label="Tasks">
-          <CheckSquareIcon />
-        </button>
-        <button type="button" className="btn btn-ghost btn-square" aria-label="Settings">
-          <GearIcon />
-        </button>
       </div>
     </header>
   )

@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react'
 import { InboxPanel } from './components/InboxPanel'
+import { MonthView } from './components/MonthView'
 import { PlannerHeader } from './components/PlannerHeader'
-import { WeekView } from './components/WeekView'
+import { TimelineGrid } from './components/TimelineGrid'
 import { blocksForDate } from './data/samplePlan'
 import { PlusIcon } from './components/Icons'
-import { addDays, getWeekDays, isSameDay, startOfSundayWeek } from './lib/week'
+import {
+  daysForView,
+  formatViewTitle,
+  navUnitLabel,
+  shiftSelectedDate,
+} from './lib/week'
 import type { InboxTask, PlannerView } from './types'
 
 const App = () => {
@@ -14,28 +20,32 @@ const App = () => {
     return now
   }, [])
 
-  const [anchorDate, setAnchorDate] = useState(today)
   const [selectedDate, setSelectedDate] = useState(today)
   const [view, setView] = useState<PlannerView>('week')
   const [inboxOpen, setInboxOpen] = useState(true)
   const [inboxTasks, setInboxTasks] = useState<InboxTask[]>([])
 
-  const days = useMemo(() => getWeekDays(anchorDate), [anchorDate])
-  const blocksByDay = useMemo(() => days.map((day) => blocksForDate(day)), [days])
+  const visibleDays = useMemo(() => daysForView(view, selectedDate), [view, selectedDate])
+  const blocksByDay = useMemo(
+    () => visibleDays.map((day) => blocksForDate(day)),
+    [visibleDays],
+  )
+  const title = useMemo(
+    () => formatViewTitle(view, selectedDate, visibleDays),
+    [view, selectedDate, visibleDays],
+  )
 
-  const shiftWeek = (amount: number) => {
-    const nextAnchor = addDays(startOfSundayWeek(anchorDate), amount * 7)
-    setAnchorDate(nextAnchor)
-    const nextDays = getWeekDays(nextAnchor)
-    if (!nextDays.some((day) => isSameDay(day, selectedDate))) {
-      const todayInWeek = nextDays.find((day) => isSameDay(day, today))
-      setSelectedDate(todayInWeek ?? nextDays[0]!)
-    }
+  const shift = (direction: 1 | -1) => {
+    setSelectedDate(shiftSelectedDate(view, selectedDate, direction))
   }
 
   const jumpToToday = () => {
-    setAnchorDate(today)
     setSelectedDate(today)
+  }
+
+  const openDayView = (date: Date) => {
+    setSelectedDate(date)
+    setView('day')
   }
 
   const focusInbox = () => {
@@ -50,11 +60,12 @@ const App = () => {
       <PlannerHeader
         inboxOpen={inboxOpen}
         onToggleInbox={() => setInboxOpen((open) => !open)}
-        monthLabelDate={anchorDate}
+        title={title}
         view={view}
+        navUnit={navUnitLabel(view)}
         onViewChange={setView}
-        onPrevWeek={() => shiftWeek(-1)}
-        onNextWeek={() => shiftWeek(1)}
+        onPrev={() => shift(-1)}
+        onNext={() => shift(1)}
         onToday={jumpToToday}
       />
 
@@ -68,36 +79,24 @@ const App = () => {
         />
 
         <div className="drawer-content flex min-h-0 min-w-0 flex-col">
-          {view === 'week' ? (
-            <WeekView
-              days={days}
+          {view === 'month' ? (
+            <MonthView
+              days={visibleDays}
+              focusMonth={selectedDate}
               today={today}
               selectedDate={selectedDate}
-              onSelectDate={(date) => {
-                setSelectedDate(date)
-                setAnchorDate(date)
-              }}
+              onSelectDate={setSelectedDate}
+              onOpenDay={openDayView}
               blocksByDay={blocksByDay}
             />
           ) : (
-            <div className="flex flex-1 items-center justify-center p-8">
-              <div className="card w-full max-w-md bg-base-100 shadow-none">
-                <div className="card-body text-center">
-                  <h2 className="card-title justify-center">
-                    {view === 'month' ? 'Month view is next' : 'This view is next'}
-                  </h2>
-                  <p className="text-base-content/60">
-                    Week view is first: Sunday through Saturday, with wake and sleep as the day&apos;s
-                    bookends. Day, multi-day, and month will use the same timeline.
-                  </p>
-                  <div className="card-actions justify-center">
-                    <button type="button" className="btn btn-primary" onClick={() => setView('week')}>
-                      Back to week
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TimelineGrid
+              days={visibleDays}
+              today={today}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              blocksByDay={blocksByDay}
+            />
           )}
 
           <div className="fab">
@@ -116,8 +115,8 @@ const App = () => {
           <label htmlFor="inbox-drawer" aria-label="Close inbox" className="drawer-overlay lg:hidden" />
           <InboxPanel
             tasks={inboxTasks}
-            onAddTask={(title) =>
-              setInboxTasks((current) => [{ id: crypto.randomUUID(), title }, ...current])
+            onAddTask={(taskTitle) =>
+              setInboxTasks((current) => [{ id: crypto.randomUUID(), title: taskTitle }, ...current])
             }
           />
         </div>
