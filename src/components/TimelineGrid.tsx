@@ -58,7 +58,7 @@ export const TimelineGrid = ({
                   {day.getDate()}
                 </span>
                 <span className="ritual-stack mt-1 flex items-center">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-content">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-content">
                     <SunIcon width={11} height={11} />
                   </span>
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-secondary-content">

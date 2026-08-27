@@ -145,7 +145,7 @@ const CompactDayCell = ({
           {day.getDate()}
         </button>
         <span className="ritual-stack flex items-center">
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content">
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-content">
             <SunIcon width={9} height={9} />
           </span>
           <span className="flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-secondary-content">
@@ -171,7 +171,7 @@ const CompactDayCell = ({
 const BlockNode = ({ kind }: { kind: TimeBlock['kind'] }) => {
   if (kind === 'wake') {
     return (
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content">
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-content">
         <SunIcon />
       </span>
     )
