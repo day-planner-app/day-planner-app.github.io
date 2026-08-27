@@ -13,3 +13,11 @@ export type InboxTask = {
   id: string
   title: string
 }
+
+export type PlanIntent = {
+  title: string
+  category: 'work' | 'personal'
+  durationMinutes: number
+}
+
+export type DayPlan = Record<string, TimeBlock[]>

@@ -9,6 +9,7 @@ type PlannerHeaderProps = {
   onPrev: () => void
   onNext: () => void
   onToday: () => void
+  onNewDay?: () => void
 }
 
 const views: Array<{ id: PlannerView; label: string }> = [
@@ -26,9 +27,18 @@ export const PlannerHeader = ({
   onPrev,
   onNext,
   onToday,
+  onNewDay,
 }: PlannerHeaderProps) => {
   return (
     <header className="navbar min-h-16 gap-3 bg-transparent px-3 py-2 lg:px-5">
+      <div className="navbar-start w-auto shrink-0">
+        {onNewDay ? (
+          <button type="button" className="btn btn-ghost rounded-full" onClick={onNewDay}>
+            New day
+          </button>
+        ) : null}
+      </div>
+
       <div className="navbar-center flex flex-1 items-center justify-center gap-3">
         <div className="dropdown">
           <button type="button" tabIndex={0} className="btn btn-ghost gap-1 text-lg font-extrabold">
